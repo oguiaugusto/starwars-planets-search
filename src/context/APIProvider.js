@@ -11,11 +11,12 @@ export default function APIProvider({ children }) {
   const [filter, setFilter] = useState(false);
   const [filters, setFilters] = useState({
     byName: '',
-    byNumericValues: {
-      column: 'population',
-      comparison: 'maior que',
-      value: 0,
-    },
+    byNumericValues: [],
+  });
+  const [numericFilter, setNumericFilter] = useState({
+    column: 'population',
+    comparison: 'maior que',
+    value: 0,
   });
 
   const [filteredData, setFilteredData] = useState([]);
@@ -37,20 +38,23 @@ export default function APIProvider({ children }) {
     setFilters({ ...filters, byName: value });
   };
 
-  const handleByNumericValues = ({ target: { name, value } }) => {
-    setFilters({
-      ...filters,
-      byNumericValues: { ...filters.byNumericValues, [name]: value },
-    });
+  const handleNumericFilter = ({ target: { name, value } }) => {
+    setNumericFilter({ ...numericFilter, [name]: value });
   };
 
   const handleFilterData = () => {
-    const { column, comparison } = filters.byNumericValues;
-    let { value = 0 } = filters.byNumericValues;
+    const { column, comparison } = numericFilter;
+    let { value = 0 } = numericFilter;
     if (value === '') value = 0;
+
     const newData = data.filter((planet) => (
       comparisonHandlers[comparison](Number(planet[column]), Number(value))
     ));
+
+    setFilters({
+      ...filters,
+      byNumericValues: [...filters.byNumericValues, { column, comparison, value }],
+    });
     setFilteredData(newData);
     setFilter(true);
   };
@@ -61,8 +65,9 @@ export default function APIProvider({ children }) {
     error,
     isLoading,
     filters,
+    numericFilter,
     handleByName,
-    handleByNumericValues,
+    handleNumericFilter,
     handleFilterData,
     filteredData,
     filter,

@@ -5,7 +5,8 @@ export default function Filters() {
   const {
     filters,
     handleByName,
-    handleByNumericValues,
+    numericFilter,
+    handleNumericFilter,
     handleFilterData,
   } = useContext(APIContext);
 
@@ -25,20 +26,24 @@ export default function Filters() {
         <select
           data-testid="column-filter"
           name="column"
-          value={ filters.byNumericValues.column }
-          onChange={ handleByNumericValues }
+          value={ numericFilter.column }
+          onChange={ handleNumericFilter }
         >
           {
-            columnFilters.map((c, i) => (
-              <option key={ `option-${c}-${i}` } value={ c }>{c}</option>
-            ))
+            columnFilters
+              .filter((c) => (
+                !filters.byNumericValues.some(({ column }) => column === c)
+              ))
+              .map((c, i) => (
+                <option key={ `option-${c}-${i}` } value={ c }>{c}</option>
+              ))
           }
         </select>
         <select
           data-testid="comparison-filter"
           name="comparison"
-          value={ filters.byNumericValues.comparison }
-          onChange={ handleByNumericValues }
+          value={ numericFilter.comparison }
+          onChange={ handleNumericFilter }
         >
           <option value="maior que">maior que</option>
           <option value="menor que">menor que</option>
@@ -48,8 +53,8 @@ export default function Filters() {
           data-testid="value-filter"
           type="number"
           name="value"
-          value={ filters.byNumericValues.value }
-          onChange={ handleByNumericValues }
+          value={ numericFilter.value }
+          onChange={ handleNumericFilter }
         />
         <button
           data-testid="button-filter"
