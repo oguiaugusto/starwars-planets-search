@@ -8,6 +8,10 @@ export default function APIProvider({ children }) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const [filters, setFilters] = useState({
+    byName: '',
+  });
+
   const fetchAPI = async () => {
     setIsLoading(true);
     fetchPlanets()
@@ -15,7 +19,11 @@ export default function APIProvider({ children }) {
       .catch((err) => { setIsLoading(false); setError(err.detail); });
   };
 
-  const contextValue = { fetchAPI, data, error, isLoading };
+  const handleByName = ({ target: { value } }) => {
+    setFilters({ ...filters, byName: value });
+  };
+
+  const contextValue = { fetchAPI, data, error, isLoading, filters, handleByName };
 
   return (
     <APIContext.Provider value={ contextValue }>
@@ -25,5 +33,8 @@ export default function APIProvider({ children }) {
 }
 
 APIProvider.propTypes = {
-  children: PropTypes.objectOf(PropTypes.any).isRequired,
+  children: PropTypes.oneOfType([
+    PropTypes.objectOf(PropTypes.any),
+    PropTypes.arrayOf(PropTypes.any),
+  ]).isRequired,
 };

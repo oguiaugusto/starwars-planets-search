@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import APIContext from '../context/APIContext';
 
 export default function Table() {
-  const { fetchAPI, data, isLoading } = useContext(APIContext);
+  const { fetchAPI, data, isLoading, filters } = useContext(APIContext);
 
   useEffect(() => {
     fetchAPI();
@@ -25,13 +25,17 @@ export default function Table() {
           </tr>
         </thead>
         <tbody>
-          {data.map((planet, i) => (
-            <tr key={ `row-${i}` }>
-              {dataKeys.map((k, kI) => (
-                <td key={ `cell-${k}-${kI}` }>{planet[k]}</td>
-              ))}
-            </tr>
-          ))}
+          {
+            data
+              .filter((planet) => planet.name.includes(filters.byName))
+              .map((planet, i) => (
+                <tr key={ `row-${i}` }>
+                  {dataKeys.map((k, kI) => (
+                    <td key={ `cell-${k}-${kI}` }>{planet[k]}</td>
+                  ))}
+                </tr>
+              ))
+          }
         </tbody>
       </table>
     </div>
