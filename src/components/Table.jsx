@@ -2,7 +2,14 @@ import React, { useContext, useEffect } from 'react';
 import APIContext from '../context/APIContext';
 
 export default function Table() {
-  const { fetchAPI, data, isLoading, filters } = useContext(APIContext);
+  const {
+    fetchAPI,
+    data,
+    isLoading,
+    filters,
+    filter,
+    filteredData,
+  } = useContext(APIContext);
 
   useEffect(() => {
     fetchAPI();
@@ -12,7 +19,10 @@ export default function Table() {
   const cols = ['Name', 'Rotation Period', 'Orbital Period',
     'Diameter', 'Climate', 'Gravity', 'Terrain', 'Surface Water',
     'Population', 'Films', 'Created', 'Edited', 'URL'];
-  const dataKeys = data[0] ? Object.keys(data[0]).filter((k) => k !== 'residents') : [];
+
+  const planets = filter ? filteredData : data;
+  const dataKeys = planets[0]
+    ? Object.keys(planets[0]).filter((k) => k !== 'residents') : [];
 
   if (isLoading) return <h1>Loading...</h1>;
 
@@ -26,7 +36,7 @@ export default function Table() {
         </thead>
         <tbody>
           {
-            data
+            planets
               .filter((planet) => planet.name.includes(filters.byName))
               .map((planet, i) => (
                 <tr key={ `row-${i}` }>

@@ -8,9 +8,17 @@ export default function APIProvider({ children }) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const [filter, setFilter] = useState(false);
   const [filters, setFilters] = useState({
     byName: '',
+    byNumericValues: {
+      column: 'population',
+      comparison: 'maior que',
+      value: 0,
+    },
   });
+
+  const [filteredData, setFilteredData] = useState([]);
 
   const fetchAPI = async () => {
     setIsLoading(true);
@@ -19,11 +27,46 @@ export default function APIProvider({ children }) {
       .catch((err) => { setIsLoading(false); setError(err.detail); });
   };
 
+  const comparisonHandlers = {
+    'maior que': (a, b) => a > b,
+    'menor que': (a, b) => a < b,
+    'igual a': (a, b) => a === b,
+  };
+
   const handleByName = ({ target: { value } }) => {
     setFilters({ ...filters, byName: value });
   };
 
-  const contextValue = { fetchAPI, data, error, isLoading, filters, handleByName };
+  const handleByNumericValues = ({ target: { name, value } }) => {
+    setFilters({
+      ...filters,
+      byNumericValues: { ...filters.byNumericValues, [name]: value },
+    });
+  };
+
+  const handleFilterData = () => {
+    const { column, comparison } = filters.byNumericValues;
+    let { value = 0 } = filters.byNumericValues;
+    if (value === '') value = 0;
+    const newData = data.filter((planet) => (
+      comparisonHandlers[comparison](Number(planet[column]), Number(value))
+    ));
+    setFilteredData(newData);
+    setFilter(true);
+  };
+
+  const contextValue = {
+    fetchAPI,
+    data,
+    error,
+    isLoading,
+    filters,
+    handleByName,
+    handleByNumericValues,
+    handleFilterData,
+    filteredData,
+    filter,
+  };
 
   return (
     <APIContext.Provider value={ contextValue }>
