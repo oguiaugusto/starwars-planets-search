@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import fetchPlanets from '../services/StarwarsAPI';
 import APIContext from './APIContext';
+
+const INITIAL_COLUMNS = ['population', 'orbital_period',
+  'diameter', 'rotation_period', 'surface_water'];
 
 export default function APIProvider({ children }) {
   const [data, setData] = useState([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const [filter, setFilter] = useState(false);
   const [filters, setFilters] = useState({
     byName: '',
     byNumericValues: [],
@@ -19,19 +20,13 @@ export default function APIProvider({ children }) {
     value: 0,
   });
 
-  const [filteredData, setFilteredData] = useState([]);
+  const [columnFilters, setColumnFilters] = useState(INITIAL_COLUMNS);
 
   const fetchAPI = async () => {
     setIsLoading(true);
     fetchPlanets()
       .then((r) => { setIsLoading(false); setData(r.results); })
       .catch((err) => { setIsLoading(false); setError(err.detail); });
-  };
-
-  const comparisonHandlers = {
-    'maior que': (a, b) => a > b,
-    'menor que': (a, b) => a < b,
-    'igual a': (a, b) => a === b,
   };
 
   const handleByName = ({ target: { value } }) => {
@@ -47,16 +42,18 @@ export default function APIProvider({ children }) {
     let { value = 0 } = numericFilter;
     if (value === '') value = 0;
 
-    const newData = data.filter((planet) => (
-      comparisonHandlers[comparison](Number(planet[column]), Number(value))
-    ));
-
     setFilters({
       ...filters,
       byNumericValues: [...filters.byNumericValues, { column, comparison, value }],
     });
-    setFilteredData(newData);
-    setFilter(true);
+    setNumericFilter({ column: columnFilters[0], comparison: 'maior que', value: 0 });
+  };
+
+  const removeFilter = (filterI) => {
+    setFilters({
+      ...filters,
+      byNumericValues: filters.byNumericValues.filter((_f, i) => i !== filterI),
+    });
   };
 
   const contextValue = {
@@ -64,14 +61,21 @@ export default function APIProvider({ children }) {
     data,
     error,
     isLoading,
+    columnFilters,
     filters,
     numericFilter,
     handleByName,
     handleNumericFilter,
     handleFilterData,
-    filteredData,
-    filter,
+    removeFilter,
   };
+
+  useEffect(() => {
+    setColumnFilters(INITIAL_COLUMNS.filter((c) => (
+      !filters.byNumericValues.some(({ column: col }) => col === c)
+    )));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   return (
     <APIContext.Provider value={ contextValue }>

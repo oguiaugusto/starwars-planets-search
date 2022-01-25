@@ -1,14 +1,19 @@
 import React, { useContext, useEffect } from 'react';
 import APIContext from '../context/APIContext';
 
+const comparisonHandlers = {
+  'maior que': (a, b) => a > b,
+  'menor que': (a, b) => a < b,
+  'igual a': (a, b) => a === b,
+};
+
 export default function Table() {
   const {
     fetchAPI,
     data,
     isLoading,
     filters,
-    filter,
-    filteredData,
+    removeFilter,
   } = useContext(APIContext);
 
   useEffect(() => {
@@ -20,14 +25,24 @@ export default function Table() {
     'Diameter', 'Climate', 'Gravity', 'Terrain', 'Surface Water',
     'Population', 'Films', 'Created', 'Edited', 'URL'];
 
-  const planets = filter ? filteredData : data;
-  const dataKeys = planets[0]
-    ? Object.keys(planets[0]).filter((k) => k !== 'residents') : [];
+  // const planets = filter ? filteredData : data;
+  const dataKeys = data[0]
+    ? Object.keys(data[0]).filter((k) => k !== 'residents') : [];
 
   if (isLoading) return <h1>Loading...</h1>;
 
   return (
     <div>
+      <div className="filters">
+        {
+          filters.byNumericValues.map(({ column, comparison, value }, i) => (
+            <div key={ `filter-${i}` } data-testid="filter">
+              <span>{ `${column} ${comparison} ${value}` }</span>
+              <button type="button" onClick={ () => removeFilter(i) }>X</button>
+            </div>
+          ))
+        }
+      </div>
       <table>
         <thead>
           <tr>
@@ -36,7 +51,11 @@ export default function Table() {
         </thead>
         <tbody>
           {
-            planets
+            data
+              .filter((planet) => (
+                filters.byNumericValues.every(({ column, comparison, value }) => (
+                  comparisonHandlers[comparison](Number(planet[column]), Number(value))
+                ))))
               .filter((planet) => planet.name.includes(filters.byName))
               .map((planet, i) => (
                 <tr key={ `row-${i}` }>

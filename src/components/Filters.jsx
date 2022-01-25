@@ -4,14 +4,12 @@ import APIContext from '../context/APIContext';
 export default function Filters() {
   const {
     filters,
+    columnFilters,
     handleByName,
     numericFilter,
     handleNumericFilter,
     handleFilterData,
   } = useContext(APIContext);
-
-  const columnFilters = ['population', 'orbital_period',
-    'diameter', 'rotation_period', 'surface_water'];
 
   return (
     <div className="filters">
@@ -30,13 +28,9 @@ export default function Filters() {
           onChange={ handleNumericFilter }
         >
           {
-            columnFilters
-              .filter((c) => (
-                !filters.byNumericValues.some(({ column }) => column === c)
-              ))
-              .map((c, i) => (
-                <option key={ `option-${c}-${i}` } value={ c }>{c}</option>
-              ))
+            columnFilters.map((c, i) => (
+              <option key={ `option-${c}-${i}` } value={ c }>{c}</option>
+            ))
           }
         </select>
         <select
