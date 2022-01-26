@@ -5,10 +5,13 @@ export default function Filters() {
   const {
     filters,
     columnFilters,
-    handleByName,
     numericFilter,
+    order,
+    handleByName,
     handleNumericFilter,
     handleFilterData,
+    handleOrder,
+    handleOrderBtn,
   } = useContext(APIContext);
 
   return (
@@ -57,6 +60,53 @@ export default function Filters() {
         >
           Filter
         </button>
+      </div>
+      <div className="order">
+        <select
+          data-testid="column-sort"
+          name="column"
+          value={ order.column }
+          onChange={ handleOrder }
+        >
+          {
+            columnFilters.map((c, i) => (
+              <option key={ `option-${c}-${i}` } value={ c }>{c}</option>
+            ))
+          }
+        </select>
+        <div className="sort">
+          <label htmlFor="asc">
+            Ascending
+            <input
+              data-testid="column-sort-input-asc"
+              type="radio"
+              name="sort"
+              id="asc"
+              value="asc"
+              checked={ order.sort === 'asc' }
+              onChange={ handleOrder }
+            />
+          </label>
+          <label htmlFor="desc">
+            Descending
+            <input
+              data-testid="column-sort-input-desc"
+              type="radio"
+              name="sort"
+              id="desc"
+              value="desc"
+              checked={ order.sort === 'desc' }
+              onChange={ handleOrder }
+            />
+          </label>
+          <button
+            data-testid="column-sort-button"
+            type="button"
+            onClick={ handleOrderBtn }
+          >
+            Filter
+          </button>
+        </div>
       </div>
     </div>
   );

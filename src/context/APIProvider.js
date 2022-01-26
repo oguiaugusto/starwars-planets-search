@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import fetchPlanets from '../services/StarwarsAPI';
 import APIContext from './APIContext';
 
+const NEGATIVE_ONE = -1;
+
 const INITIAL_COLUMNS = ['population', 'orbital_period',
   'diameter', 'rotation_period', 'surface_water'];
 
@@ -10,6 +12,7 @@ export default function APIProvider({ children }) {
   const [data, setData] = useState([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [columnFilters, setColumnFilters] = useState(INITIAL_COLUMNS);
   const [filters, setFilters] = useState({
     byName: '',
     byNumericValues: [],
@@ -19,13 +22,22 @@ export default function APIProvider({ children }) {
     comparison: 'maior que',
     value: 0,
   });
-
-  const [columnFilters, setColumnFilters] = useState(INITIAL_COLUMNS);
+  const [order, setOrder] = useState({
+    column: 'population',
+    sort: 'asc',
+  });
 
   const fetchAPI = async () => {
     setIsLoading(true);
     fetchPlanets()
-      .then((r) => { setIsLoading(false); setData(r.results); })
+      .then((r) => {
+        setIsLoading(false);
+        const sortedData = r.results.sort((a, b) => {
+          if (a.name < b.name) return NEGATIVE_ONE;
+          return (a.name > b.name) ? 1 : 0;
+        });
+        setData(sortedData);
+      })
       .catch((err) => { setIsLoading(false); setError(err.detail); });
   };
 
@@ -49,6 +61,21 @@ export default function APIProvider({ children }) {
     setNumericFilter({ column: columnFilters[0], comparison: 'maior que', value: 0 });
   };
 
+  const handleOrder = ({ target: { name, value } }) => {
+    setOrder({ ...order, [name]: value });
+  };
+
+  const handleOrderBtn = () => {
+    const { column, sort } = order;
+    const newData = sort === 'asc' ? (
+      [...data].sort((a, b) => Number(a[column]) - Number(b[column]))
+    ) : (
+      [...data]
+        .sort((a, b) => Number(b[column]) - Number(a[column]))
+    );
+    setData(newData);
+  };
+
   const removeFilter = (filterI) => {
     setFilters({
       ...filters,
@@ -64,9 +91,12 @@ export default function APIProvider({ children }) {
     columnFilters,
     filters,
     numericFilter,
+    order,
     handleByName,
     handleNumericFilter,
     handleFilterData,
+    handleOrder,
+    handleOrderBtn,
     removeFilter,
   };
 

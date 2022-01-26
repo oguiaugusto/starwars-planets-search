@@ -59,9 +59,16 @@ export default function Table() {
               .filter((planet) => planet.name.includes(filters.byName))
               .map((planet, i) => (
                 <tr key={ `row-${i}` }>
-                  {dataKeys.map((k, kI) => (
+                  {dataKeys.map((k, kI) => ((k === 'name') ? (
+                    <td
+                      data-testid="planet-name"
+                      key={ `cell-${k}-${kI}` }
+                    >
+                      {planet[k]}
+                    </td>
+                  ) : (
                     <td key={ `cell-${k}-${kI}` }>{planet[k]}</td>
-                  ))}
+                  )))}
                 </tr>
               ))
           }
