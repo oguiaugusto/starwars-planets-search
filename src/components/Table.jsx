@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import APIContext from '../context/APIContext';
+import '../styles/table.css';
 
 const comparisonHandlers = {
   'maior que': (a, b) => a > b,
@@ -32,7 +33,7 @@ export default function Table() {
   if (isLoading) return <h1>Loading...</h1>;
 
   return (
-    <div>
+    <div className="table-container">
       <div className="filters">
         {
           filters.byNumericValues.map(({ column, comparison, value }, i) => (
@@ -43,7 +44,7 @@ export default function Table() {
           ))
         }
       </div>
-      <table>
+      <table className="table table-dark text-center">
         <thead>
           <tr>
             {cols.map((col, i) => <th key={ `col${i}` } scope="col">{col}</th>)}

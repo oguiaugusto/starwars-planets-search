@@ -7,6 +7,7 @@ import './App.css';
 function App() {
   return (
     <APIProvider>
+      <h1 className="text-center m-3">StarWars Planets Search</h1>
       <Filters />
       <Table />
     </APIProvider>
